@@ -14,8 +14,10 @@ import {
   XCircle,
   Eye,
   Edit,
-  Trash2
+  Trash2,
+  Link2
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // Mock data
 const pendingPartners = [
@@ -143,13 +145,17 @@ const Admin = () => {
                     <Users className="h-6 w-6" />
                     <span>Review Partners</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
-                    <BookOpen className="h-6 w-6" />
-                    <span>Add Course</span>
+                  <Button asChild variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                    <Link to="/admin/course/1">
+                      <BookOpen className="h-6 w-6" />
+                      <span>Edit Course</span>
+                    </Link>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
-                    <TrendingUp className="h-6 w-6" />
-                    <span>View Analytics</span>
+                  <Button asChild variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                    <Link to="/admin/sso-integration">
+                      <Link2 className="h-6 w-6" />
+                      <span>SSO Setup</span>
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -267,9 +273,11 @@ const Admin = () => {
                             <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit
+                          <Button asChild size="sm" variant="outline">
+                            <Link to={`/admin/course/${course.id}`}>
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Link>
                           </Button>
                           <Button size="sm" variant="outline">
                             <Trash2 className="h-4 w-4" />

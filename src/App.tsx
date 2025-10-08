@@ -7,6 +7,8 @@ import Home from "./pages/Home";
 import Marketplace from "./pages/Marketplace";
 import PartnerRegister from "./pages/PartnerRegister";
 import Admin from "./pages/Admin";
+import CourseEditor from "./pages/CourseEditor";
+import SSOIntegration from "./pages/SSOIntegration";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +24,8 @@ const App = () => (
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/partner-register" element={<PartnerRegister />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/course/:id" element={<CourseEditor />} />
+          <Route path="/admin/sso-integration" element={<SSOIntegration />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

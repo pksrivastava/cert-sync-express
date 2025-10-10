@@ -13,6 +13,8 @@ import Courses from "./pages/admin/Courses";
 import Settings from "./pages/admin/Settings";
 import CourseEditor from "./pages/CourseEditor";
 import SSOIntegration from "./pages/SSOIntegration";
+import CertificateTemplates from "./pages/admin/CertificateTemplates";
+import KnowledgeCentre from "./pages/KnowledgeCentre";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,11 +29,13 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/partner-register" element={<PartnerRegister />} />
+          <Route path="/knowledge-centre" element={<KnowledgeCentre />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="partners" element={<Partners />} />
             <Route path="courses" element={<Courses />} />
             <Route path="course/:id" element={<CourseEditor />} />
+            <Route path="certificates" element={<CertificateTemplates />} />
             <Route path="sso-integration" element={<SSOIntegration />} />
             <Route path="settings" element={<Settings />} />
           </Route>

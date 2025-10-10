@@ -6,7 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Marketplace from "./pages/Marketplace";
 import PartnerRegister from "./pages/PartnerRegister";
-import Admin from "./pages/Admin";
+import AdminLayout from "./pages/AdminLayout";
+import Dashboard from "./pages/admin/Dashboard";
+import Partners from "./pages/admin/Partners";
+import Courses from "./pages/admin/Courses";
+import Settings from "./pages/admin/Settings";
 import CourseEditor from "./pages/CourseEditor";
 import SSOIntegration from "./pages/SSOIntegration";
 import NotFound from "./pages/NotFound";
@@ -23,9 +27,14 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/partner-register" element={<PartnerRegister />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/course/:id" element={<CourseEditor />} />
-          <Route path="/admin/sso-integration" element={<SSOIntegration />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="partners" element={<Partners />} />
+            <Route path="courses" element={<Courses />} />
+            <Route path="course/:id" element={<CourseEditor />} />
+            <Route path="sso-integration" element={<SSOIntegration />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

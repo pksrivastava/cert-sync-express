@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Save, Eye, FileText, Image as ImageIcon, Palette } from "lucide-react";
 
@@ -45,15 +47,27 @@ export default function ContentCMS() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">Content Management System</h1>
-          <p className="text-muted-foreground">Customize page content, text, and branding</p>
+          <h1 className="text-4xl font-bold mb-2">
+            Content <span className="gradient-text">Management</span>
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Customize page content and branding
+          </p>
         </div>
-        <Button variant="outline" size="sm">
-          <Eye className="h-4 w-4 mr-2" />
-          Preview Changes
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Eye className="h-4 w-4 mr-2" />
+            Preview
+          </Button>
+          <Button asChild>
+            <Link to="/admin/marketing-pages">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Marketing Pages
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="home" className="space-y-6">

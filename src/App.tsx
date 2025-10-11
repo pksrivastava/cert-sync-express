@@ -14,6 +14,8 @@ import Settings from "./pages/admin/Settings";
 import CourseEditor from "./pages/CourseEditor";
 import SSOIntegration from "./pages/SSOIntegration";
 import CertificateTemplates from "./pages/admin/CertificateTemplates";
+import ContentCMS from "./pages/admin/ContentCMS";
+import TrainingCalendar from "./pages/admin/TrainingCalendar";
 import KnowledgeCentre from "./pages/KnowledgeCentre";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="courses" element={<Courses />} />
             <Route path="course/:id" element={<CourseEditor />} />
             <Route path="certificates" element={<CertificateTemplates />} />
+            <Route path="training-calendar" element={<TrainingCalendar />} />
+            <Route path="content-cms" element={<ContentCMS />} />
             <Route path="sso-integration" element={<SSOIntegration />} />
             <Route path="settings" element={<Settings />} />
           </Route>

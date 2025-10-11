@@ -25,22 +25,46 @@ const PartnerRegister = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Send confirmation email to partner
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: formData.email,
+          type: "registration",
+          partnerName: formData.organizationName
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Registration Submitted!",
+          description: "Check your email for confirmation. We'll review your application within 2-3 business days.",
+        });
+        setFormData({
+          organizationName: "",
+          contactName: "",
+          email: "",
+          phone: "",
+          website: "",
+          description: ""
+        });
+      } else {
+        throw new Error("Failed to send confirmation email");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
       toast({
-        title: "Registration Submitted!",
-        description: "Your partner application is pending admin approval. We'll contact you within 2-3 business days.",
+        title: "Registration Submitted",
+        description: "Your application is pending review. Note: Email confirmation may have failed.",
+        variant: "destructive"
       });
+    } finally {
       setIsSubmitting(false);
-      setFormData({
-        organizationName: "",
-        contactName: "",
-        email: "",
-        phone: "",
-        website: "",
-        description: ""
-      });
-    }, 1500);
+    }
   };
 
   const handleChange = (

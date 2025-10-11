@@ -1,7 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Eye, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Eye, Clock } from "lucide-react";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const pendingPartners = [
   {
@@ -27,6 +29,58 @@ const activePartners = [
 ];
 
 export default function Partners() {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleApprove = async (partner: typeof pendingPartners[0]) => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: partner.email,
+          type: "approval",
+          partnerName: partner.name
+        })
+      });
+
+      if (response.ok) {
+        toast.success(`${partner.name} approved and notified via email`);
+      } else {
+        toast.success(`${partner.name} approved (email notification failed)`);
+      }
+    } catch (error) {
+      toast.error("Failed to send approval email");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleReject = async (partner: typeof pendingPartners[0]) => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: partner.email,
+          type: "rejection",
+          partnerName: partner.name
+        })
+      });
+
+      if (response.ok) {
+        toast.success(`${partner.name} rejected and notified via email`);
+      } else {
+        toast.success(`${partner.name} rejected (email notification failed)`);
+      }
+    } catch (error) {
+      toast.error("Failed to send rejection email");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -63,11 +117,21 @@ export default function Partners() {
                     <Eye className="h-4 w-4 mr-1" />
                     Review
                   </Button>
-                  <Button size="sm" className="shadow-glow">
+                  <Button 
+                    size="sm" 
+                    className="shadow-glow"
+                    onClick={() => handleApprove(partner)}
+                    disabled={isProcessing}
+                  >
                     <CheckCircle className="h-4 w-4 mr-1" />
                     Approve
                   </Button>
-                  <Button size="sm" variant="destructive">
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => handleReject(partner)}
+                    disabled={isProcessing}
+                  >
                     <XCircle className="h-4 w-4" />
                   </Button>
                 </div>

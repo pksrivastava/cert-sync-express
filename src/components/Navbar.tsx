@@ -1,11 +1,34 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, X } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { GraduationCap, Menu, X, LogOut } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast.success("Signed out successfully");
+    navigate("/");
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -18,7 +41,7 @@ const Navbar = () => {
               <GraduationCap className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold gradient-text hidden sm:inline">
-              MSP Marketplace
+              iGOT Karmayogi
             </span>
           </Link>
 
@@ -48,9 +71,18 @@ const Navbar = () => {
             >
               Admin
             </Link>
-            <Button variant="default" size="sm" className="shadow-glow">
-              Sign In
-            </Button>
+            {user ? (
+              <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            ) : (
+              <Link to="/auth">
+                <Button variant="default" size="sm" className="shadow-glow">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -87,9 +119,18 @@ const Navbar = () => {
               Admin
             </Link>
             <div className="px-4">
-              <Button variant="default" size="sm" className="w-full shadow-glow">
-                Sign In
-              </Button>
+              {user ? (
+                <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="default" size="sm" className="w-full shadow-glow">
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         )}

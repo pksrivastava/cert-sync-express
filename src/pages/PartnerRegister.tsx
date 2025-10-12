@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Building2, Mail, Phone, Globe, FileText, CheckCircle2 } from "lucide-react";
@@ -26,40 +27,52 @@ const PartnerRegister = () => {
     setIsSubmitting(true);
 
     try {
-      // Send confirmation email to partner
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Insert partner registration into database
+      const { error: insertError } = await supabase
+        .from("partners")
+        .insert({
+          organization_name: formData.organizationName,
+          contact_person: formData.contactName,
+          email: formData.email,
+          phone: formData.phone,
+          website: formData.website,
+          description: formData.description,
+          status: "pending"
+        });
+
+      if (insertError) throw insertError;
+
+      // Send confirmation email to partner using edge function
+      const { data: functionData, error: functionError } = await supabase.functions.invoke('send-email', {
+        body: {
           to: formData.email,
           type: "registration",
           partnerName: formData.organizationName
-        })
+        }
       });
 
-      if (response.ok) {
-        toast({
-          title: "Registration Submitted!",
-          description: "Check your email for confirmation. We'll review your application within 2-3 business days.",
-        });
-        setFormData({
-          organizationName: "",
-          contactName: "",
-          email: "",
-          phone: "",
-          website: "",
-          description: ""
-        });
-      } else {
-        throw new Error("Failed to send confirmation email");
+      if (functionError) {
+        console.error("Email error:", functionError);
       }
+
+      toast({
+        title: "Registration Submitted!",
+        description: "Check your email for confirmation. We'll review your application within 2-3 business days.",
+      });
+      
+      setFormData({
+        organizationName: "",
+        contactName: "",
+        email: "",
+        phone: "",
+        website: "",
+        description: ""
+      });
     } catch (error) {
       console.error("Registration error:", error);
       toast({
-        title: "Registration Submitted",
-        description: "Your application is pending review. Note: Email confirmation may have failed.",
+        title: "Error",
+        description: "Failed to submit registration. Please try again.",
         variant: "destructive"
       });
     } finally {

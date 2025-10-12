@@ -20,6 +20,7 @@ import MarketingPages from "./pages/admin/MarketingPages";
 import Analytics from "./pages/admin/Analytics";
 import KnowledgeCentre from "./pages/KnowledgeCentre";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/partner-register" element={<PartnerRegister />} />
           <Route path="/knowledge-centre" element={<KnowledgeCentre />} />

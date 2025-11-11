@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      course_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       course_enrollments: {
         Row: {
           completed_at: string | null
@@ -52,47 +85,81 @@ export type Database = {
       courses: {
         Row: {
           category: string | null
+          category_id: string | null
+          course_code: string | null
           created_at: string
+          created_by: string | null
           description: string | null
           duration_hours: number | null
+          enrollment_count: number | null
+          external_url: string | null
           id: string
           is_published: boolean | null
           level: string | null
+          objectives: string[] | null
           partner_id: string | null
+          platform_id: string | null
           price: number | null
+          rating: number | null
           thumbnail_url: string | null
           title: string
+          topics: string[] | null
           updated_at: string
         }
         Insert: {
           category?: string | null
+          category_id?: string | null
+          course_code?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           duration_hours?: number | null
+          enrollment_count?: number | null
+          external_url?: string | null
           id?: string
           is_published?: boolean | null
           level?: string | null
+          objectives?: string[] | null
           partner_id?: string | null
+          platform_id?: string | null
           price?: number | null
+          rating?: number | null
           thumbnail_url?: string | null
           title: string
+          topics?: string[] | null
           updated_at?: string
         }
         Update: {
           category?: string | null
+          category_id?: string | null
+          course_code?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           duration_hours?: number | null
+          enrollment_count?: number | null
+          external_url?: string | null
           id?: string
           is_published?: boolean | null
           level?: string | null
+          objectives?: string[] | null
           partner_id?: string | null
+          platform_id?: string | null
           price?: number | null
+          rating?: number | null
           thumbnail_url?: string | null
           title?: string
+          topics?: string[] | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "courses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "course_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "courses_partner_id_fkey"
             columns: ["partner_id"]
@@ -100,7 +167,44 @@ export type Database = {
             referencedRelation: "partners"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "courses_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "learning_platforms"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      learning_platforms: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
       }
       marketing_pages: {
         Row: {
@@ -141,17 +245,85 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_settings: {
+        Row: {
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      partner_reviews: {
+        Row: {
+          action: string
+          comments: string | null
+          created_at: string | null
+          id: string
+          partner_id: string
+          reviewed_by: string
+        }
+        Insert: {
+          action: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          partner_id: string
+          reviewed_by: string
+        }
+        Update: {
+          action?: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          partner_id?: string
+          reviewed_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_reviews_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           address: string | null
+          agreement_url: string | null
           contact_person: string
           created_at: string
           description: string | null
           email: string
           id: string
+          is_active: boolean | null
+          logo_url: string | null
           notes: string | null
           organization_name: string
+          partner_code: string | null
           phone: string
+          primary_contact_email: string | null
+          rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["partner_status"]
@@ -162,14 +334,20 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          agreement_url?: string | null
           contact_person: string
           created_at?: string
           description?: string | null
           email: string
           id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
           notes?: string | null
           organization_name: string
+          partner_code?: string | null
           phone: string
+          primary_contact_email?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["partner_status"]
@@ -180,14 +358,20 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          agreement_url?: string | null
           contact_person?: string
           created_at?: string
           description?: string | null
           email?: string
           id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
           notes?: string | null
           organization_name?: string
+          partner_code?: string | null
           phone?: string
+          primary_contact_email?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["partner_status"]
@@ -227,6 +411,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sso_configurations: {
+        Row: {
+          attribute_mappings: Json | null
+          certificate: string | null
+          client_id: string | null
+          client_secret: string | null
+          created_at: string | null
+          created_by: string | null
+          entity_id: string | null
+          id: string
+          idp_metadata_url: string | null
+          is_enabled: boolean | null
+          partner_id: string | null
+          provider_type: string
+          sso_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          attribute_mappings?: Json | null
+          certificate?: string | null
+          client_id?: string | null
+          client_secret?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          entity_id?: string | null
+          id?: string
+          idp_metadata_url?: string | null
+          is_enabled?: boolean | null
+          partner_id?: string | null
+          provider_type: string
+          sso_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          attribute_mappings?: Json | null
+          certificate?: string | null
+          client_id?: string | null
+          client_secret?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          entity_id?: string | null
+          id?: string
+          idp_metadata_url?: string | null
+          is_enabled?: boolean | null
+          partner_id?: string | null
+          provider_type?: string
+          sso_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sso_configurations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       training_events: {
         Row: {
@@ -289,6 +532,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_karma: {
+        Row: {
+          current_year_enrollments: number | null
+          id: string
+          last_year_reset_date: string | null
+          total_points: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          current_year_enrollments?: number | null
+          id?: string
+          last_year_reset_date?: string | null
+          total_points?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          current_year_enrollments?: number | null
+          id?: string
+          last_year_reset_date?: string | null
+          total_points?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

@@ -10,6 +10,8 @@ import AdminLayout from "./pages/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Partners from "./pages/admin/Partners";
 import Courses from "./pages/admin/Courses";
+import Categories from "./pages/admin/Categories";
+import Platforms from "./pages/admin/Platforms";
 import Settings from "./pages/admin/Settings";
 import CourseEditor from "./pages/CourseEditor";
 import SSOIntegration from "./pages/SSOIntegration";
@@ -40,6 +42,8 @@ const App = () => (
             <Route index element={<Dashboard />} />
             <Route path="partners" element={<Partners />} />
             <Route path="courses" element={<Courses />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="platforms" element={<Platforms />} />
             <Route path="course/:id" element={<CourseEditor />} />
             <Route path="certificates" element={<CertificateTemplates />} />
             <Route path="training-calendar" element={<TrainingCalendar />} />

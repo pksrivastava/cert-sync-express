@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BookOpen, Settings, Link2, Award, FileText, CalendarDays, Layout, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, Settings, Link2, Award, FileText, CalendarDays, Layout, BarChart3, FolderTree, Globe } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -16,6 +16,8 @@ const adminItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Partners", url: "/admin/partners", icon: Users },
   { title: "Courses", url: "/admin/courses", icon: BookOpen },
+  { title: "Categories", url: "/admin/categories", icon: FolderTree },
+  { title: "Platforms", url: "/admin/platforms", icon: Globe },
   { title: "Certificates", url: "/admin/certificates", icon: Award },
   { title: "Training Calendar", url: "/admin/training-calendar", icon: CalendarDays },
   { title: "Content CMS", url: "/admin/content-cms", icon: FileText },

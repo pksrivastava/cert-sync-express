@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -6,15 +7,78 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign, CreditCard } from "lucide-react";
+import { DollarSign, CreditCard, Users, TrendingUp, Calendar } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Settings() {
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [maxEnrollments, setMaxEnrollments] = useState(5);
+  const [minKarmaPoints, setMinKarmaPoints] = useState(0);
+  const [annualLimit, setAnnualLimit] = useState(20);
+  const [yearStartMonth, setYearStartMonth] = useState(4);
+  const [yearStartDay, setYearStartDay] = useState(1);
 
-  const handleSaveRevenue = () => {
-    toast({
-      title: "Revenue Settings Saved",
-      description: "Payment split configuration has been updated",
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("marketplace_settings")
+        .select("*");
+
+      if (error) throw error;
+
+      data?.forEach((setting) => {
+        const value = setting.setting_value as any;
+        if (setting.setting_key === "max_concurrent_enrollments") {
+          setMaxEnrollments(value.value || 5);
+        } else if (setting.setting_key === "min_karma_points") {
+          setMinKarmaPoints(value.value || 0);
+        } else if (setting.setting_key === "annual_enrollment_limit") {
+          setAnnualLimit(value.value || 20);
+          setYearStartMonth(value.year_start_month || 4);
+          setYearStartDay(value.year_start_day || 1);
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      toast.error("Failed to load settings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveSetting = async (key: string, value: any) => {
+    try {
+      const { error } = await supabase
+        .from("marketplace_settings")
+        .update({ setting_value: value })
+        .eq("setting_key", key);
+
+      if (error) throw error;
+      toast.success("Setting updated successfully");
+    } catch (error) {
+      console.error("Error saving setting:", error);
+      toast.error("Failed to save setting");
+    }
+  };
+
+  const handleSaveEnrollmentLimit = () => {
+    saveSetting("max_concurrent_enrollments", { value: maxEnrollments });
+  };
+
+  const handleSaveKarmaPoints = () => {
+    saveSetting("min_karma_points", { value: minKarmaPoints });
+  };
+
+  const handleSaveAnnualLimit = () => {
+    saveSetting("annual_enrollment_limit", {
+      value: annualLimit,
+      year_start_month: yearStartMonth,
+      year_start_day: yearStartDay
     });
   };
 
@@ -29,12 +93,137 @@ export default function Settings() {
         </p>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+      <Tabs defaultValue="marketplace" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 max-w-3xl">
+          <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="revenue">Revenue Sharing</TabsTrigger>
-          <TabsTrigger value="payments">Payment Providers</TabsTrigger>
+          <TabsTrigger value="revenue">Revenue</TabsTrigger>
+          <TabsTrigger value="payments">Payments</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="marketplace" className="space-y-6">
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Learner Enrollment Settings
+              </CardTitle>
+              <CardDescription>Configure enrollment limits and access policies for learners</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="max-enrollments">Maximum Concurrent Enrollments</Label>
+                <Input 
+                  id="max-enrollments" 
+                  type="number" 
+                  min="0"
+                  value={maxEnrollments}
+                  onChange={(e) => setMaxEnrollments(parseInt(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Maximum number of courses a learner can be enrolled in simultaneously (0 = unlimited)
+                </p>
+              </div>
+              <Button onClick={handleSaveEnrollmentLimit} className="shadow-glow">
+                Save Enrollment Limit
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Karma Point Requirements
+              </CardTitle>
+              <CardDescription>Set minimum karma points for marketplace access</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="min-karma">Minimum Karma Points for Marketplace Access</Label>
+                <Input 
+                  id="min-karma" 
+                  type="number" 
+                  min="0"
+                  value={minKarmaPoints}
+                  onChange={(e) => setMinKarmaPoints(parseInt(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Learners need this many karma points to access marketplace content (0 = no requirement)
+                </p>
+              </div>
+              <Button onClick={handleSaveKarmaPoints} className="shadow-glow">
+                Save Karma Requirement
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Annual Enrollment Limits
+              </CardTitle>
+              <CardDescription>Configure annual/financial year enrollment restrictions</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="annual-limit">Maximum Annual Marketplace Enrollments</Label>
+                <Input 
+                  id="annual-limit" 
+                  type="number" 
+                  min="0"
+                  value={annualLimit}
+                  onChange={(e) => setAnnualLimit(parseInt(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Maximum marketplace courses per learner per year (0 = unlimited)
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="year-start-month">Financial Year Start Month</Label>
+                  <Select value={yearStartMonth.toString()} onValueChange={(v) => setYearStartMonth(parseInt(v))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        "January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"
+                      ].map((month, idx) => (
+                        <SelectItem key={idx + 1} value={(idx + 1).toString()}>
+                          {month}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="year-start-day">Start Day</Label>
+                  <Input 
+                    id="year-start-day" 
+                    type="number" 
+                    min="1"
+                    max="31"
+                    value={yearStartDay}
+                    onChange={(e) => setYearStartDay(parseInt(e.target.value) || 1)}
+                  />
+                </div>
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                Current year resets on: Day {yearStartDay} of Month {yearStartMonth}
+              </p>
+
+              <Button onClick={handleSaveAnnualLimit} className="shadow-glow">
+                Save Annual Settings
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="general" className="space-y-6">
           <Card className="border-2">
@@ -173,7 +362,7 @@ export default function Settings() {
                 <Switch defaultChecked />
               </div>
 
-              <Button onClick={handleSaveRevenue} className="shadow-glow">
+              <Button className="shadow-glow">
                 Save Revenue Settings
               </Button>
             </CardContent>

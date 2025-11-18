@@ -1,14 +1,50 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { 
   BookOpen, Code, Zap, Database, Lock, Webhook, 
-  FileJson, Terminal, ArrowRight, Download 
+  FileJson, Terminal, ArrowRight, Download, Star, Users, Clock
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 export default function KnowledgeCentre() {
+  // Fetch featured courses
+  const { data: courses = [] } = useQuery({
+    queryKey: ['featured-courses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*, partners(organization_name, logo_url), learning_platforms(name)')
+        .eq('is_published', true)
+        .order('rating', { ascending: false })
+        .limit(6);
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Fetch partners
+  const { data: partners = [] } = useQuery({
+    queryKey: ['active-partners'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('partners')
+        .select('id, organization_name, logo_url, website')
+        .eq('status', 'approved')
+        .eq('is_active', true)
+        .limit(8);
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const apiDocs = [
     {
       icon: Webhook,
@@ -86,6 +122,100 @@ export default function KnowledgeCentre() {
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
+                {/* Featured Courses Section */}
+                <Card className="border-2">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Featured Courses</CardTitle>
+                    <CardDescription className="text-base">
+                      Top-rated courses from our partner platforms
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-3 gap-6 mb-6">
+                      {courses.slice(0, 3).map((course) => (
+                        <Link key={course.id} to="/marketplace">
+                          <Card className="border hover:border-primary transition-all cursor-pointer h-full">
+                            <CardHeader>
+                              <div className="flex items-start justify-between mb-2">
+                                <Badge variant="secondary">
+                                  {course.learning_platforms?.name || 'Platform'}
+                                </Badge>
+                                <div className="flex items-center gap-1 text-sm">
+                                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                  <span>{course.rating || 0}</span>
+                                </div>
+                              </div>
+                              <CardTitle className="text-lg line-clamp-2">{course.title}</CardTitle>
+                              <CardDescription className="line-clamp-2">
+                                {course.description}
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-0">
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>{course.duration_hours}h</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  <span>{course.enrollment_count || 0}</span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="text-center">
+                      <Link to="/marketplace">
+                        <Button>
+                          View All Courses <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Partner Platforms */}
+                {partners.length > 0 && (
+                  <Card className="border-2">
+                    <CardHeader>
+                      <CardTitle className="text-2xl">Partner Platforms</CardTitle>
+                      <CardDescription className="text-base">
+                        Trusted learning providers in our marketplace
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {partners.map((partner) => (
+                          <a
+                            key={partner.id}
+                            href={partner.website || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center gap-3 p-4 border rounded-lg hover:border-primary transition-all"
+                          >
+                            {partner.logo_url ? (
+                              <img
+                                src={partner.logo_url}
+                                alt={partner.organization_name}
+                                className="h-12 w-auto object-contain"
+                              />
+                            ) : (
+                              <div className="h-12 w-12 bg-muted rounded-lg flex items-center justify-center">
+                                <BookOpen className="h-6 w-6 text-muted-foreground" />
+                              </div>
+                            )}
+                            <span className="text-sm font-medium text-center line-clamp-2">
+                              {partner.organization_name}
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <Card className="border-2">
                   <CardHeader>
                     <CardTitle className="text-2xl">Integration Overview</CardTitle>
@@ -227,6 +357,110 @@ export default function KnowledgeCentre() {
                     </Card>
                   ))}
                 </div>
+
+                {/* Webhook Configuration Guide */}
+                <Card className="border-2 mt-6">
+                  <CardHeader>
+                    <CardTitle className="text-2xl flex items-center gap-2">
+                      <Webhook className="h-6 w-6 text-primary" />
+                      Webhook Configuration - Course Completion
+                    </CardTitle>
+                    <CardDescription className="text-base">
+                      Send course completion data to iGOT to automatically update learner progress and certificates
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div>
+                      <h3 className="font-semibold mb-2">Webhook Endpoint</h3>
+                      <div className="bg-muted rounded-lg p-3 font-mono text-sm break-all">
+                        POST https://bupngjuqwrhdrqqooqbj.supabase.co/functions/v1/course-completion-webhook
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold mb-2">Required Payload</h3>
+                      <div className="bg-background rounded-lg p-4 font-mono text-xs overflow-x-auto border">
+                        <pre>{`{
+  "user_id": "uuid-of-user",
+  "course_id": "uuid-of-course-in-igot",
+  "completion_status": "completed",
+  "progress": 100,
+  "score": 85,
+  "certificate_url": "https://partner.com/cert/12345",
+  "completed_at": "2024-11-18T10:30:00Z"
+}`}</pre>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold mb-2">Field Descriptions</h3>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex gap-2">
+                          <Badge variant="outline">user_id</Badge>
+                          <span className="text-muted-foreground">UUID of the learner in iGOT system (required)</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="outline">course_id</Badge>
+                          <span className="text-muted-foreground">UUID of the course in iGOT catalog (required)</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="outline">completion_status</Badge>
+                          <span className="text-muted-foreground">"completed", "failed", or "in_progress"</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="outline">progress</Badge>
+                          <span className="text-muted-foreground">Percentage (0-100)</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="outline">certificate_url</Badge>
+                          <span className="text-muted-foreground">Public URL to downloadable certificate (optional)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold mb-2">Security (Recommended)</h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Include a signature header to verify webhook authenticity:
+                      </p>
+                      <div className="bg-background rounded-lg p-3 font-mono text-xs border">
+                        X-Webhook-Signature: sha256_hash_of_secret+payload
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold mb-2">Example cURL Request</h3>
+                      <div className="bg-background rounded-lg p-4 font-mono text-xs overflow-x-auto border">
+                        <pre>{`curl -X POST \\
+  https://bupngjuqwrhdrqqooqbj.supabase.co/functions/v1/course-completion-webhook \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "course_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+    "completion_status": "completed",
+    "progress": 100,
+    "score": 92,
+    "completed_at": "2024-11-18T10:30:00Z"
+  }'`}</pre>
+                      </div>
+                    </div>
+
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                      <h4 className="font-semibold mb-2 flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-primary" />
+                        What Happens Automatically
+                      </h4>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>✓ Learner's enrollment progress is updated</li>
+                        <li>✓ Completion timestamp is recorded</li>
+                        <li>✓ Course enrollment counter is incremented</li>
+                        <li>✓ User's karma points increase by 10</li>
+                        <li>✓ Annual enrollment count is tracked</li>
+                        <li>✓ Certificate URL is stored (if provided)</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="sdk" className="space-y-6">

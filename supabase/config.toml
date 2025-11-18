@@ -1,1 +1,4 @@
 project_id = "bupngjuqwrhdrqqooqbj"
+
+[functions.course-completion-webhook]
+verify_jwt = false
